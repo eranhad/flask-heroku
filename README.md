@@ -1,12 +1,11 @@
 # Flask and Heroku
 ## _Deploying a python flask app using Heroku and pipelines to implement a deployment workflow with staging environment_
-
+------------------------------
 ### Heroku Account Setup
 The first step is to create a [Heroku account](https://signup.heroku.com/), If you don't already have one:
 ### Heroku CLI
 The **Heroku** command line interface is a tool that allows you to create and manage Heroku applications from the terminal.
 Install the CLI from the following link (you also need GIT insalled as well):
-
 [![N|Download](https://drive.google.com/uc?export=view&id=12ClfpbqNAUZHwyEyvwBqripzJ55vwLIL)](https://devcenter.heroku.com/articles/heroku-cli#download-and-install)
 
 Next, you have to login by running the following command:
@@ -89,5 +88,79 @@ git push staging master
 Production environment is still using the previous version.
 Only then, when we are happy with the cahnges,  we can promote our new application version to production:
 ```sh
+heroku pipelines:promote --remote staging
+```
+
+-----------------------------------
+
+### Manage settings and secrets for different environments:
+We will create a **config.py** file to hold non-sensetive values and read sensetive values such as database passwords from environment variables.
+We create a class (config) for each environment.
+
+```py
+import os
+
+class Config:
+    DEBUG = False
+    DEVELOPMENT = False
+    DB_PASS = os.getenv("best-password-ever", "this-is-the-default-value")
+
+class ProductionConfig(Config):
+    pass
+
+class StagingConfig(Config):
+    DEBUG = True
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    DEVELOPMENT = True
+```
+
+Our app should look like this now:
+```py
+import os
+from flask import Flask
+
+app = Flask(__name__)
+env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+app.config.from_object(env_config)
+
+@app.route("/")
+def index():
+    db_pass = app.config.get("DB_PASS")
+    return f"The configured database password is {db_pass}."
+```
+
+The value of env veriable **APP_SETTINGS** will determine which configuration class (environment) will be loaded.
+If not defined then we set the default as **config.DevelopmentConfig"**
+We can customize the values of some variables by setting up environment variables before lunching the app (via power shell):
+```sh
+$env:DB_PASS="some_password"
+flask run
+```
+
+Commit the changes and push them to staging environment:
+```sh
+git add app.py config.py
+git commit -m "Add config support"
+git push staging master
+```
+
+Using **Heroku CLI** you can customize the environment veriables for staging:
+```sh  
+heroku config:set --remote staging DB_PASS=some-new-value APP_SETTINGS=config.StagingConfig
+```
+>Setting DB_PASS, APP_SETTINGS and restarting ⬢ my-app-name-staging... done, v5
+>APP_SETTINGS: config.StagingConfig
+>DB_PASS:      some-new-value
+
+To get the values of the environment variables for any app:
+```sh
+heroku config --remote staging
+```
+
+Finally, promot the new version to production with different configuration values:
+```sa
+heroku config:set --remote prod DB_PASS=the-production-password APP_SETTINGS=config.ProductionConfig
 heroku pipelines:promote --remote staging
 ```
