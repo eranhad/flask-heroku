@@ -6,6 +6,7 @@ The first step is to create a [Heroku account](https://signup.heroku.com/), If y
 ### Heroku CLI
 The **Heroku** command line interface is a tool that allows you to create and manage Heroku applications from the terminal.
 Install the CLI from the following link (you also need GIT insalled as well):
+
 [![N|Download](https://drive.google.com/uc?export=view&id=12ClfpbqNAUZHwyEyvwBqripzJ55vwLIL)](https://devcenter.heroku.com/articles/heroku-cli#download-and-install)
 
 Next, you have to login by running the following command:
