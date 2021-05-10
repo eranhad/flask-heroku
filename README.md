@@ -1,6 +1,6 @@
 # Flask and Heroku
 ## _Deploying a python flask app using Heroku and pipelines to implement a deployment workflow with staging environment_
-------------------------------
+
 ### Heroku Account Setup
 The first step is to create a [Heroku account](https://signup.heroku.com/), If you don't already have one:
 ### Heroku CLI
